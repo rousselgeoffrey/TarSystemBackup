@@ -85,6 +85,8 @@ tar -cvpzf "$filename" \
 --exclude=/sys \
 --exclude=/run \
 --exclude=/media \
+--exclude=/home/*/.cache \
+--exclude=/home/*/.local/share/Trash \
 --exclude=/var/log \
 --exclude=/var/cache/apt/archives /
 find / -perm -4000 -print > "$filename.SUID"
@@ -93,6 +95,7 @@ EOF
 # ^EOF exit chroot
  
 # Move the file to final destination, so we can unmount partition
+echo "Moving files to final destination...this can take a long time."
 mv "$backup_path/$filename" "$filename"
 testError "cannot move backup to final destination."
  
