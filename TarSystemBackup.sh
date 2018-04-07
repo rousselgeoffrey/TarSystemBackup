@@ -96,6 +96,7 @@ EOF
 # ^EOF exit chroot
  
 # Move the file to final destination, so we can unmount partition
+echo
 echo "Moving files to final destination...this can take a long time."
 mv "$backup_path/$tmp_backup_file" "$filename"
 testError "cannot move backup to final destination."
