@@ -56,7 +56,8 @@ read key
  
 # Ensure partition is unmounted then mount it
 umount $partition > /dev/null 2>&1
- 
+
+# Temporary mount point
 backup_path=$(mktemp -d /tmp/backup_XXXXXXXX)
 mount $partition $backup_path
 testError "cannot mount partition."
@@ -64,20 +65,20 @@ testError "cannot mount partition."
 # TODO: check to see if we have enough free space on partition(chroot)...if not unmount and quit
 # TODO: check to see if we have enough free space on destination("$filename" path)...if not unmount and quit
  
-# Create possible intermediary parent path for output file if needed.
-# Should not be needed here but will be needed in the chroot
+# Create possible intermediary parent dirs for output file
+# Should not be needed...
 ppath=$(echo "$filename" | sed 's/\/[^\/]*$//')
 mkdir -p "$ppath"
  
 # Enter chroot
 # Note that the tarball will be created inside the chroot
-# -mkdir- will create possible intermediary dirs that probably aren't there in the chroot
+# Create the tarball in chroots' /tmp
 # then -find- to save SUID and SGID file list
 cat << EOF | chroot "$backup_path/"
-mkdir -p "$ppath"
+tmp_backup_file=$(mktemp /tmp/backup_data_XXXXXXXX)
 cd /
-tar -cvpzf "$filename" \
---exclude="$filename" \
+tar -cvpzf "$tmp_backup_file" \
+--exclude="$tmp_backup_file" \
 --exclude=/proc \
 --exclude=/tmp \
 --exclude=/mnt \
@@ -89,19 +90,19 @@ tar -cvpzf "$filename" \
 --exclude=/home/*/.local/share/Trash \
 --exclude=/var/log \
 --exclude=/var/cache/apt/archives /
-find / -perm -4000 -print > "$filename.SUID"
-find / -perm -2000 -print > "$filename.SGID"
+find / -perm -4000 -print > "$tmp_backup_file.SUID"
+find / -perm -2000 -print > "$tmp_backup_file.SGID"
 EOF
 # ^EOF exit chroot
  
 # Move the file to final destination, so we can unmount partition
 echo "Moving files to final destination...this can take a long time."
-mv "$backup_path/$filename" "$filename"
+mv "$backup_path/$tmp_backup_file" "$filename"
 testError "cannot move backup to final destination."
  
 # Also move SUID and SGID file list
-mv "$backup_path/$filename.SUID" "$filename.SUID"
-mv "$backup_path/$filename.SGID" "$filename.SGID"
+mv "$backup_path/$tmp_backup_file.SUID" "$filename.SUID"
+mv "$backup_path/$tmp_backup_file.SGID" "$filename.SGID"
  
 # Unmount
 umount $backup_path
