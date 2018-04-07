@@ -74,8 +74,8 @@ mkdir -p "$ppath"
 # Note that the tarball will be created inside the chroot
 # Create the tarball in chroots' /tmp
 # then -find- to save SUID and SGID file list
-cat << EOF | chroot "$backup_path/"
 tmp_backup_file=$(mktemp /tmp/backup_data_XXXXXXXX)
+cat << EOF | chroot "$backup_path/"
 cd /
 tar -cvpzf "$tmp_backup_file" \
 --exclude="$tmp_backup_file" \
