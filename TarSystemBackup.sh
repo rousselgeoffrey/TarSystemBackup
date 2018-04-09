@@ -167,7 +167,9 @@ testError "cannot unmount partition."
  
 echo "Files restored."
 disk=$(echo $partition | sed 's/[0-9]*$//')
-echo "To restore MBR type: dd if=$filename.MBR of=$disk"
+if [ -f "$filename.MBR" ]; then
+	echo "To restore MBR type: dd if=$filename.MBR of=$disk"
+fi
 echo "Done."
 }
  
