@@ -79,6 +79,7 @@ cat << EOF | chroot "$backup_path/"
 cd /
 tar -cvpzf "$tmp_backup_file" \
 --exclude="$tmp_backup_file" \
+--exclude=/swapfile \
 --exclude=/proc \
 --exclude=/tmp \
 --exclude=/mnt \
